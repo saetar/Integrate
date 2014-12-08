@@ -68,9 +68,8 @@ public class Polynomial implements Function{
 		if(isConstant){
 			answer = Math.pow(Integrator.evaluate(coef,x),Integrator.evaluate(exponent,x));
 		}else{
-			answer = Integrator.evaluate(coef,x)*Math.pow(x,Integrator.evaluate(exponent,x));
+			answer = Integrator.evaluate(coef,x)*Math.pow(x,Integrator.evaluate(exponent,x)-1);
 		}
-		System.out.println(Integrator.evaluate(coef,x) + "^" + Integrator.evaluate(exponent,x)+"="+answer);
 		return answer;
 	}
 }

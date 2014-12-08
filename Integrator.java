@@ -27,6 +27,11 @@ public class Integrator{
 
 	public static ArrayList<String> split(String express){
 		ArrayList<String> inputs = new ArrayList<String>();
+		Pattern paren = Pattern.compile("\\((.*)\\)");
+		Matcher parenmatch = paren.matcher(express);
+		if(parenmatch.find()){
+			inputs.add(parenmatch.group(1));
+		}
 		int i = 0;
 		while(i < express.length()){
 			String s = "";
