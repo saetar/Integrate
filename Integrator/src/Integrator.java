@@ -6,12 +6,12 @@ import java.util.regex.Pattern;
 	Has main function
 */
 public class Integrator{
-
+	
 	public static char variable;
 	public static ArrayList<Pattern> patterns;
 	public static ArrayList<String> tokens;
 	public static Stack<String> opStack;
-	public static Queue<String> god;
+	public static ArrayDeque<String> god;
 
 	public static void main(String[] args){
 		//Finds the String representation of the function, and the variable with respect to which it is integrated.
@@ -38,16 +38,22 @@ public class Integrator{
 
 
 		tokenize(expression);
-		print(tokens);
+		//print(tokens);
 		preprocess();
-		print(tokens);
+		//print(tokens);
 		
 		opStack = new Stack<String>();
 		god = new ArrayDeque<String>();
 		makeGod();
 		print(god);
 		System.out.println(evaluate(2));
-		//System.out.println(integrate(0,2));
+		/*double test = romberg(0,10,.001);
+		System.out.println(test);
+		int round = (int)(test+.5);
+		if(Math.abs(test-round) < .001){
+			System.out.println(round);
+		}
+		*/
 		scan.close();
 	}
 	
@@ -60,15 +66,13 @@ public class Integrator{
 		for(int i = 0; i < patterns.size(); i++){
 			Matcher matcher = patterns.get(i).matcher(str);
 			if(matcher.find()){
-				System.out.println("Found " + i + "th matcher ");
 				interest = matcher.group();
-				System.out.println("interest: " + interest);
+				System.out.println(interest);
 				tokens.add(interest);
 				str=str.substring(interest.length());
 				break;
 			}
 		}
-		System.out.println(str);
 		tokenize(str);
 	}
 	
@@ -101,7 +105,6 @@ public class Integrator{
 	}
 	
 	public static void makeGod(){
-		
 		for(int i = 0; i < tokens.size(); i++){
 			String s = tokens.get(i);
 			char c = s.charAt(0);
@@ -112,18 +115,15 @@ public class Integrator{
 			}
 			
 			//If c is addition or subtraction
+			//It will always have lowest precedent
 			else if(c=='+'|| c=='-'){
-				if(opStack.empty()) opStack.push(s);
-				else{
-					//If the other things had a higher precedent, then pop operators onto queue
-					if(opStack.peek().charAt(0)!='+' && opStack.peek().charAt(0)!='-'){
-						while(opStack.peek().charAt(0) != '(' && opStack.peek().charAt(0)!='+' && opStack.peek().charAt(0)!='-' && !opStack.empty()){
-							god.add(opStack.pop());
-						}
-					}
-					//push it onto the stack
-						opStack.push(s);
+				while(!opStack.isEmpty()){
+					char t = opStack.peek().charAt(0);
+					if(t=='(') break;
+					god.add(opStack.pop());
 				}
+				//push it onto the stack
+				opStack.push(s);
 			}
 			
 			//If multiplication or division
@@ -131,36 +131,34 @@ public class Integrator{
 				if(opStack.empty()) opStack.push(s);
 				else{
 					char t = opStack.peek().charAt(0);
-					//If the other things had a higher precedent, then pop operators onto queue
-					if(t!='/'&&t!='*' && t!='+' && t!='-' && t!='('){
-						while(t!='/'&&t!='*' && t!='+' && t!='-' && t!='('){
-							god.add(opStack.pop());
-						}
+					//If the other things had a higher or equal precedent, then pop operators onto queue
+					
+					while(t!='+' && t!='-' && t!='('){
+						god.add(opStack.pop());
+						if(opStack.isEmpty()) break;
+						t = opStack.peek().charAt(0);
 					}
 					//If same/lower priority, push it onto opStack
-					else{
-						opStack.push(s);
-					}
+					
+					opStack.push(s);
+					
 				}
 			}
 			
-			//If it's an exponent, only sin, log, etc. will have higher precedence
+			//If it's an exponent, only another exponent, sin, log, etc. will have higher precedence 
 			else if(c=='^'){
 				if(opStack.empty()) opStack.push(s);
 				else{
 					char t = opStack.peek().charAt(0);
 					//If the other things had a higher precedent, then pop operators onto queue
-					if(t!='*' && t!='/'&& t!='s' && t!='c' && t!='t' && t!='l' && t!='('){
-						while(t!='/' && t!='*' && t!='s'&&t!='c' && t!='t' && t!='l' && t!='('){
-							god.add(opStack.pop());
-							t = opStack.peek().charAt(0);
-						}
-						opStack.push(s);
+					
+					while(t=='s' || t=='c' || t=='t' || t=='l'){
+						god.add(opStack.pop());
+						if(opStack.isEmpty()) break;
+						t = opStack.peek().charAt(0);
 					}
+					opStack.push(s);
 					//If same/lower priority, push it onto opStack
-					else{
-						opStack.push(s);
-					}
 				}
 			}
 			
@@ -186,7 +184,6 @@ public class Integrator{
 				opStack.pop();
 			}
 		}
-		print(opStack);
 		//Pop all leftover operators onto god
 		while(!opStack.empty()){
 			god.add(opStack.pop());
@@ -195,16 +192,17 @@ public class Integrator{
 
 	//evaluates god at x
 	public static double evaluate(double x){
-		Queue<String> temp = god;
+		Queue<String> temp = god.clone();
 		Stack<String> eval = new Stack<String>();
-		String a;
 		double z;
 		double y;
-		
+		//int counter = 0;
 		while(!temp.isEmpty()){
+			//counter++;
+			//System.out.println(counter);
 			String toke = temp.poll();
 			char t = toke.charAt(0);
-
+			//print(eval);
 			if(Character.isDigit(t)){
 				eval.push(toke);
 			}
@@ -214,23 +212,23 @@ public class Integrator{
 			}
 			
 			if(t=='s'){
-				a = eval.pop();
-				eval.push(String.valueOf(Math.sin(Double.parseDouble(a))));
+				z = Double.parseDouble(eval.pop());
+				eval.push(String.valueOf(Math.sin(z)));
 			}
 			
 			if(t=='c'){
-				a = eval.pop();
-				eval.push(String.valueOf(Math.cos(Double.parseDouble(a))));
+				z = Double.parseDouble(eval.pop());
+				eval.push(String.valueOf(Math.cos(z)));
 			}
 			
 			if(t=='t'){
-				a = eval.pop();
-				eval.push(String.valueOf(Math.tan(Double.parseDouble(a))));
+				z = Double.parseDouble(eval.pop());
+				eval.push(String.valueOf(Math.tan(z)));
 			}
 			
 			if(t=='l'){
-				a = eval.pop();
-				eval.push(String.valueOf(Math.log(Double.parseDouble(a))));
+				z = Double.parseDouble(eval.pop());
+				eval.push(String.valueOf(Math.log(z)));
 			}
 	
 			if(t=='+'){
@@ -260,19 +258,35 @@ public class Integrator{
 			if(t=='^'){
 				z = Double.parseDouble(eval.pop());
 				y = Double.parseDouble(eval.pop());
-				eval.add(String.valueOf(Math.pow(z, y)));
+				eval.add(String.valueOf(Math.pow(y, z)));
 			}
 		}
 		return Double.parseDouble(eval.pop());
 	}
 	
-	public static double integrate(double start, double end){
-		double answer = 0;
-		/*for(double i = start; i < end; i+=.00001){
-			answer += god.traverse(i);
+	
+	//Uses the romberg method of numerically integrating
+	public static double romberg(double start, double end, double maxErr){
+		int steps = 2;
+		double t1 = integrate(start,end,steps);
+		steps *= 2;
+		double t2 = integrate(start,end,steps);
+		while(Math.abs(t2-t1) > maxErr){
+			steps *= 2;
+			t1 = t2;
+			t2 = integrate(start,end,steps);
 		}
-		answer /= 100000;
-		System.out.println(answer);*/
+		return t2;
+	}
+	
+	public static double integrate(double start, double end, int numOfStep){
+		double step = (end-start)/numOfStep;
+		double answer = 0;
+		//Note: this is a midpoint Riemann Sum
+		for(double i = start; i < end; i+=step){
+			answer += evaluate(i+step/2);
+		}
+		answer *= step;
 		return answer;
 	}
 	
