@@ -22,62 +22,69 @@ public class Integrator{
 	public static ArrayDeque<String> god;
 
 	public static void main(String[] args){
-		//Finds the String representation of the function, and the variable with respect to which it is integrated.
-		//Creates functions, initializes local variables
+		boolean again = true;
 		Scanner scan = new Scanner(System.in);
-		System.out.println("What expression would you like to integrate?");
-		String expression = scan.nextLine();
-		System.out.println("And with respect to what variable?");
-		patterns = new ArrayList<Pattern>();
-		variable = scan.nextLine().charAt(0);
-		tokens = new ArrayList<String>();
-		System.out.print("Starting bound: ");
-		double start = scan.nextDouble();
-		
-		System.out.print("Ending bound: ");
-		double end = scan.nextDouble();
-		
-		System.out.print("Leniency: ");
-		double leniency = scan.nextDouble();
-		//A token is either a number (string of digits)
-		Pattern number = Pattern.compile("^(\\d+)");
-		//or a token is one character (parentheses or binary operator)
-		Pattern onechar = Pattern.compile("^(\\*|\\/|\\+|\\-|\\^|\\(|\\)|e|"+variable+ ")");
-		//or a token is a trig/log function etc.
-		Pattern complex = Pattern.compile("^sinh|cosh|tanh|log|ln|sin|cos|tan");
-
-		//Add patterns to global variable
-		patterns.add(number);
-		patterns.add(onechar);
-		patterns.add(complex);
-
-		//Fill tokens
-		tokenize(expression);
-		//print(tokens);
-		//preprocess tokens
-		preprocess();
-		//print(tokens);
-		//Initialize and make god
-		god = new ArrayDeque<String>();
-		makeGod();
-		//print(god);
-		//Testing
-		System.out.println(evaluate(2));
-		double test = romberg(start,end,leniency);
-		System.out.println(test);
-		
-		//If an answer is within .001 of an integer, round to that integer.
-		double round;
-		if(test > 0){
-			round = Math.floor(test+.5);
+		while(again){
+			//Finds the String representation of the function, and the variable with respect to which it is integrated.
+			//Creates functions, initializes local variables
+			System.out.println("What expression would you like to integrate?");
+			String expression = scan.nextLine();
+			System.out.println("And with respect to what variable?");
+			patterns = new ArrayList<Pattern>();
+			variable = scan.nextLine().charAt(0);
+			tokens = new ArrayList<String>();
+			System.out.print("Starting bound: ");
+			double start = scan.nextDouble();
+			
+			System.out.print("Ending bound: ");
+			double end = scan.nextDouble();
+			
+			System.out.print("Leniency: ");
+			double leniency = scan.nextDouble();
+			//A token is either a number (string of digits)
+			Pattern number = Pattern.compile("^(\\d+)");
+			//or a token is one character (parentheses or binary operator)
+			Pattern onechar = Pattern.compile("^(\\*|\\/|\\+|\\-|\\^|\\(|\\)|e|"+variable+ ")");
+			//or a token is a trig/log function etc.
+			Pattern complex = Pattern.compile("^sinh|cosh|tanh|log|ln|sin|cos|tan");
+	
+			//Add patterns to global variable
+			patterns.add(number);
+			patterns.add(onechar);
+			patterns.add(complex);
+	
+			//Fill tokens
+			tokenize(expression);
+			//print(tokens);
+			//preprocess tokens
+			preprocess();
+			//print(tokens);
+			//Initialize and make god
+			god = new ArrayDeque<String>();
+			makeGod();
+			//print(god);
+			//Testing
+			double test = romberg(start,end,leniency);
+			
+			//If an answer is within .001 of an integer, round to that integer.
+			double round;
+			if(test > 0){
+				round = Math.floor(test+.5);
+			}
+			else{
+				round = Math.floor(test-.5);
+			}
+			
+			if(Math.abs(test-round) < .001){
+				System.out.println(round);
+			}
+			else System.out.println(test);
+			System.out.println("Would you like to do it again?");
+			scan.nextLine();
+			String response = scan.nextLine();
+			if(response.charAt(0) == 'n') again=false;
 		}
-		else{
-			round = Math.floor(test-.5);
-		}
-		
-		if(Math.abs(test-round) < .001){
-			System.out.println(round);
-		}
+		System.out.println("Thank you, come again");
 		scan.close();
 	}
 	
