@@ -1,12 +1,14 @@
 This is a project that I started Winter break 2014 just to occupy my time. 
 It is an integrator that uses Riemann sums to evaluate expressions given as a string.
 
+Integrator.java is in the src file. This is the only file required to run the program. There are a lot of other classes I wrote, but ended up not being usefull. However, they are all still available in /Integrator/src if people want to check them out. Tree.java was particularly interesting to write. :)
+
 The overall method used to evaluate the string was to tokenize the expression, dividing it up into necessary pieces of the expression, like sin(x^2) -> sin, (, x, ^, 2, ). Then, the program will process and rearrange the tokens into Reverse Polish Notation. Then an evaluator can evaluate this RPN stack at any given value. 
 
 To make integration more efficient, I implemented the Romberg method of numerical integration. The idea is to get as close as we want to the actual answer (maxErr). To do this, we keep taking Riemann sums with a given step count, and then redo it with double the stepcounts. Keep doubling stepcounts until the difference between the last two times we integrated is less than maxErr.
 
 TO USE:
-This is just a command-line program, so download the .class or .java, compile (if necessary) and then type on the command-line: java Integrator
+This is just a command-line program, so download the Integrator.class or Integrator.java, compile (if necessary) and then type on the command-line: java Integrator
 You will be prompted: What expression would you like to integrate? You may input an expression (no "f(x)=") using hyperbolic trig, normal trig, ln/log (both evaluate the natural log), e, binary ops (+-*/^) etc. Ex: 4sinh(sin(4x^3+2)-4).
 
 Then you will be asked what variable the expression is with respect to. Just enter x for example. 
