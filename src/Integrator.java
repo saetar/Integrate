@@ -415,14 +415,13 @@ public class Integrator{
 	 * isNumeric takes a string and returns if it's a number. 
 	 * Taken from StackOverflow.com
 	 */
-	public static boolean isNumeric(String str)  
-	{  
-	  try{  
-		  double d = Double.parseDouble(str);  
-	  }catch(NumberFormatException nfe)  {  
-		  return false;  
-	  }  
-	  return true;  
+	public static boolean isNumeric(String str)  {  
+		try{  
+			double d = Double.parseDouble(str);  
+		 }catch(NumberFormatException nfe)  {  
+			 return false;  
+		 }  
+		 return true;  
 	}
 	
 	/*
